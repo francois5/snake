@@ -11,6 +11,10 @@ function preload() {
     game.load.image('chunk', 'assets/chunk.png');
     game.load.image('food', 'assets/food.png');
 
+    game.load.audio('eat', ['assets/eat.mp3', 'assets/eat.ogg']);
+    game.load.audio('gameover', ['assets/gameover.mp3', 'assets/gameover.ogg']);
+    game.load.audio('music', ['assets/flyingOverTheTop.wav', 'assets/flyingOverTheTop.mp3', 'assets/flyingOverTheTop.ogg']);
+
     game.load.image('btn', 'assets/playbutton.png');
 }
 
@@ -57,6 +61,8 @@ var snake = new Snake(20, 10);
 var foodX;
 var foodY;
 
+var music;
+
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
 }
@@ -65,6 +71,7 @@ function rand_foodY() {
 }
 
 function create() {
+    music = game.add.audio('music');
     game.stage.backgroundColor = '#000';
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
@@ -79,6 +86,7 @@ function create() {
 }
 
 function actionOnClick () {
+    music.play('', 0, 1, true);
     current_state = game_state.GAME;
     button.visible = false;
     score = 0;
@@ -120,6 +128,8 @@ function move() {
 function check_eat() {
     if(snake.head.x == foodX && snake.head.y == foodY) {
 	snake.grow();
+	var snd_eat = game.add.audio('eat');
+	snd_eat.play();
 	score+=1;
 	spawn_food();
 	images[foodY][foodX].destroy();
@@ -144,6 +154,9 @@ function is_on_border(x, y) {
 }
 
 function game_over() {
+    music.pause();
+    var snd_gameover = game.add.audio('gameover');
+    snd_gameover.play();
     current_state = game_state.MENU;
     clean_board();
     current_direction = direction.STOP;
