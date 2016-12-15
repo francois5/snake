@@ -81,6 +81,8 @@ function create() {
 function actionOnClick () {
     current_state = game_state.GAME;
     button.visible = false;
+    score = 0;
+    images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
 }
 
@@ -120,6 +122,7 @@ function check_eat() {
 	snake.grow();
 	score+=1;
 	spawn_food();
+	images[foodY][foodX].destroy();
 	images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
     }
 }
@@ -142,7 +145,6 @@ function is_on_border(x, y) {
 
 function game_over() {
     current_state = game_state.MENU;
-    score = 0;
     clean_board();
     current_direction = direction.STOP;
     snake = new Snake(20, 10);
