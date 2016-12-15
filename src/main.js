@@ -54,14 +54,14 @@ var next_event = 0;
 // snake
 var snake = new Snake(20, 10);
 
-var foodX = rand_foodX();
-var foodY = rand_foodY();
+var foodX;
+var foodY;
 
 function rand_foodX() {
-    return Math.floor(Math.random() * 40) + 1;
+    return Math.floor(Math.random() * 38) + 2;
 }
 function rand_foodY() {
-    return Math.floor(Math.random() * 19) + 1;
+    return Math.floor(Math.random() * 17) + 2;
 }
 
 function create() {
@@ -69,7 +69,7 @@ function create() {
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
-
+    spawn_food();
     upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -119,10 +119,16 @@ function check_eat() {
     if(snake.head.x == foodX && snake.head.y == foodY) {
 	snake.grow();
 	score+=1;
-	foodX = rand_foodX();
-	foodY = rand_foodY();
+	spawn_food();
 	images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
     }
+}
+
+function spawn_food() {
+    foodX = rand_foodX();
+    foodY = rand_foodY();
+    if(snake.is_on(foodX, foodY))
+	spawn_food();
 }
 
 function check_game_over() {
@@ -140,8 +146,7 @@ function game_over() {
     clean_board();
     current_direction = direction.STOP;
     snake = new Snake(20, 10);
-    foodX = rand_foodX();
-    foodY = rand_foodY();
+    spawn_food();
     button.destroy();
     button = game.add.button(250, 120, 'btn', actionOnClick, this, 2, 1, 0);
 }

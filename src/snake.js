@@ -48,4 +48,14 @@ var Snake = function(x, y) {
 		curNode.x += 1;
 	}
     }
+
+    this.is_on = function(x, y) {
+	var curNode = this.tail;
+	while(curNode != null) {
+	    if(curNode.x == x && curNode.y == y)
+		return true;
+	    curNode = curNode.next;
+	}
+	return false;
+    }
 }
