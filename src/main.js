@@ -71,7 +71,9 @@ function rand_foodY() {
 }
 
 function create() {
-    music = game.add.audio('music');
+    music = game.add.audio('music', 1, true, true);
+    snd_eat = game.add.audio('eat', 0.6, false, true);
+    snd_gameover = game.add.audio('gameover', 0.2, false, true);
     game.stage.backgroundColor = '#000';
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
@@ -86,7 +88,7 @@ function create() {
 }
 
 function actionOnClick () {
-    music.play('', 0, 1, true);
+    music.play();
     current_state = game_state.GAME;
     button.visible = false;
     score = 0;
@@ -128,7 +130,6 @@ function move() {
 function check_eat() {
     if(snake.head.x == foodX && snake.head.y == foodY) {
 	snake.grow();
-	var snd_eat = game.add.audio('eat');
 	snd_eat.play();
 	score+=1;
 	spawn_food();
@@ -155,7 +156,6 @@ function is_on_border(x, y) {
 
 function game_over() {
     music.pause();
-    var snd_gameover = game.add.audio('gameover');
     snd_gameover.play();
     current_state = game_state.MENU;
     clean_board();
