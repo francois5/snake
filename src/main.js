@@ -13,7 +13,7 @@ function preload() {
 
     game.load.audio('eat', ['assets/eat.mp3', 'assets/eat.ogg']);
     game.load.audio('gameover', ['assets/gameover.mp3', 'assets/gameover.ogg']);
-    game.load.audio('music', ['assets/flyingOverTheTop.wav', 'assets/flyingOverTheTop.mp3', 'assets/flyingOverTheTop.ogg']);
+    game.load.audio('music', ['assets/8bit-music-loop.wav', 'assets/8bit-music-loop.mp3', 'assets/8bit-music-loop.ogg']);
 
     game.load.image('btn', 'assets/playbutton.png');
 }
