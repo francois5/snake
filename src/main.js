@@ -15,7 +15,7 @@ function preload() {
     game.load.audio('gameover', ['assets/gameover.mp3', 'assets/gameover.ogg']);
     game.load.audio('music', ['assets/8bit-music-loop.wav', 'assets/8bit-music-loop.mp3', 'assets/8bit-music-loop.ogg']);
 
-    game.load.image('btn', 'assets/playbutton.png');
+    game.load.spritesheet('btn', 'assets/button_sprite_sheet.png', 260, 100);
 }
 
 // image grid (y: 21 x: 42)
@@ -89,6 +89,17 @@ function create() {
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
+    button.events.onInputOver.add(overBtn, this);
+    button.events.onInputOut.add(outBtn, this);
+}
+
+function overBtn() {
+    snd_eat.play();
+    button.key = 'btnBlackText';
+}
+
+function outBtn() {
+    button.key = 'btn';
 }
 
 function displayDifficultyChoice() {
