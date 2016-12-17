@@ -51,6 +51,7 @@ var game_state = {
 };
 var current_state = game_state.MENU;
 var score = 0;
+var max_score = 0;
 
 // next event time
 var next_event = 0;
@@ -78,6 +79,7 @@ function create() {
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
+    max_score = localStorage.getItem('snake_max_score');
     spawn_food();
     upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
@@ -98,7 +100,8 @@ function actionOnClick () {
 
 function render() {
     this.game.debug.text('SCORE: '+score, 10, 14, 'red', 'Segoe UI');
-    this.game.debug.text('CONTROLS: arrow keys', 10, 28, 'red', 'Segoe UI');
+    this.game.debug.text('MAX SCORE: '+max_score, 10, 28, 'red', 'Segoe UI');
+    this.game.debug.text('CONTROLS: arrow keys', 10, 42, 'red', 'Segoe UI');
 }
 
 function update() {
@@ -164,6 +167,10 @@ function game_over() {
     spawn_food();
     button.destroy();
     button = game.add.button(250, 120, 'btn', actionOnClick, this, 2, 1, 0);
+    if(score > max_score) {
+	max_score = score;
+	localStorage.setItem('snake_max_score', max_score);
+    }
 }
 
 function clean_board() {
