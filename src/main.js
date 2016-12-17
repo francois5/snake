@@ -63,6 +63,7 @@ var foodX;
 var foodY;
 
 var music;
+var difficultyFactor;
 
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
@@ -72,13 +73,14 @@ function rand_foodY() {
 }
 
 function create() {
-    music = game.add.audio('music', 1, true, true);
-    snd_eat = game.add.audio('eat', 0.6, false, true);
+    music = game.add.audio('music', 0.9, true, true);
+    snd_eat = game.add.audio('eat', 0.5, false, true);
     snd_gameover = game.add.audio('gameover', 0.2, false, true);
     game.stage.backgroundColor = '#000';
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
+    draw_frame();
     max_score = localStorage.getItem('snake_max_score');
     spawn_food();
     upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -86,22 +88,72 @@ function create() {
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
-    button = game.add.button(250, 120, 'btn', actionOnClick, this, 2, 1, 0);
+    button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
 }
 
-function actionOnClick () {
+function displayDifficultyChoice() {
+    var style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+    textBtnEasy = game.add.text(270, 140, 'Easy', style);
+    textBtnMedium = game.add.text(270, 200, 'Medium', style);
+    textBtnHard = game.add.text(270, 260, 'Hard', style);
+    textBtnEasy.inputEnabled = true;
+    textBtnMedium.inputEnabled = true;
+    textBtnHard.inputEnabled = true;
+    textBtnEasy.events.onInputOver.add(over, this);
+    textBtnEasy.events.onInputOut.add(out, this);
+    textBtnEasy.events.onInputDown.add(BtnEasyDown, this);
+    textBtnMedium.events.onInputOver.add(over, this);
+    textBtnMedium.events.onInputOut.add(out, this);
+    textBtnMedium.events.onInputDown.add(BtnMediumDown, this);
+    textBtnHard.events.onInputOver.add(over, this);
+    textBtnHard.events.onInputOut.add(out, this);
+    textBtnHard.events.onInputDown.add(BtnHardDown, this);
+}
+
+function over(item) {
+    snd_eat.play();
+    item.fill = "#a00909";
+}
+
+function out(item) {
+    item.fill = "#fff";
+}
+
+function BtnEasyDown(item) {
+    difficultyFactor = 1;
+    startGame();
+}
+
+function BtnMediumDown(item) {
+    difficultyFactor = 0.8;
+    startGame();
+}
+
+function BtnHardDown(item) {
+    difficultyFactor = 0.5;
+    startGame();
+}
+
+function btnPlayClick() {
+    displayDifficultyChoice();
+    button.visible = false;
+}
+
+function startGame() {
+    textBtnEasy.visible = false;
+    textBtnMedium.visible = false;
+    textBtnHard.visible = false;
     music.play();
     current_state = game_state.GAME;
-    button.visible = false;
     score = 0;
     images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
 }
 
 function render() {
-    this.game.debug.text('SCORE: '+score, 10, 14, 'red', 'Segoe UI');
-    this.game.debug.text('MAX SCORE: '+max_score, 10, 28, 'red', 'Segoe UI');
-    this.game.debug.text('CONTROLS: arrow keys', 10, 42, 'red', 'Segoe UI');
+    this.game.debug.text('SCORE: '+score, 16, 28, 'red', 'Segoe UI');
+    this.game.debug.text('MAX SCORE: '+max_score, 16, 42, 'red', 'Segoe UI');
+    this.game.debug.text('CONTROLS: arrow keys', 16, 56, 'red', 'Segoe UI');
 }
 
 function update() {
@@ -110,7 +162,7 @@ function update() {
 	move();
 	check_eat();
 	check_game_over();
-	next_event = game.time.now + 100;
+	next_event = game.time.now + (100*difficultyFactor);
     }
 }
 
@@ -166,7 +218,7 @@ function game_over() {
     snake = new Snake(20, 10);
     spawn_food();
     button.destroy();
-    button = game.add.button(250, 120, 'btn', actionOnClick, this, 2, 1, 0);
+    button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     if(score > max_score) {
 	max_score = score;
 	localStorage.setItem('snake_max_score', max_score);
@@ -179,6 +231,7 @@ function clean_board() {
 	   images[y][x].destroy();
 	   images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
        }
+    draw_frame();
 }
 
 function draw_snake() {
@@ -198,3 +251,14 @@ function draw_snake() {
 			snake.head.y*TILE_SIZE,
 			'chunk');
 }
+
+function draw_frame() {
+    var style = { font: "bold 20px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+    game.add.text(10, 0, "---------------------------------------------------------------------------------------------------------------------", style);
+    game.add.text(10, 395, "---------------------------------------------------------------------------------------------------------------------", style);
+    for(var y=10; y<395; y+=22) {
+	game.add.text(9, y, "|", style);
+	game.add.text(824, y, "|", style);
+    }
+}
+
