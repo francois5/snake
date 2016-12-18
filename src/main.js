@@ -51,7 +51,7 @@ var game_state = {
 };
 var current_state = game_state.MENU;
 var score = 0;
-var max_score = 0;
+var max_score_easy, max_score_medium, max_score_hard;
 
 // next event time
 var next_event = 0;
@@ -64,6 +64,7 @@ var foodY;
 
 var music;
 var difficultyFactor;
+var difficulty;
 
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
@@ -74,14 +75,14 @@ function rand_foodY() {
 
 function create() {
     music = game.add.audio('music', 0.9, true, true);
-    snd_eat = game.add.audio('eat', 0.5, false, true);
+    snd_eat = game.add.audio('eat', 0.3, false, true);
     snd_gameover = game.add.audio('gameover', 0.2, false, true);
     game.stage.backgroundColor = '#000';
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
     draw_frame();
-    max_score = localStorage.getItem('snake_max_score');
+    getMaxScores();
     spawn_food();
     upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
@@ -91,6 +92,12 @@ function create() {
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     button.events.onInputOver.add(overBtn, this);
     button.events.onInputOut.add(outBtn, this);
+}
+
+function getMaxScores() {
+    max_score_easy   = localStorage.getItem('snake_max_score_easy');
+    max_score_medium = localStorage.getItem('snake_max_score_medium');
+    max_score_hard   = localStorage.getItem('snake_max_score_hard');
 }
 
 function overBtn() {
@@ -131,16 +138,19 @@ function out(item) {
 }
 
 function BtnEasyDown(item) {
+    difficulty = 1;
     difficultyFactor = 1;
     startGame();
 }
 
 function BtnMediumDown(item) {
+    difficulty = 2;
     difficultyFactor = 0.8;
     startGame();
 }
 
 function BtnHardDown(item) {
+    difficulty = 3;
     difficultyFactor = 0.5;
     startGame();
 }
@@ -163,13 +173,15 @@ function startGame() {
 
 function render() {
     this.game.debug.text('SCORE: '+score, 16, 28, 'red', 'Segoe UI');
-    this.game.debug.text('MAX SCORE: '+max_score, 16, 42, 'red', 'Segoe UI');
+    this.game.debug.text('MAX SCORE: easy: '+max_score_easy
+			 +' medium: '+max_score_medium
+			 +' hard: '+max_score_hard, 16, 42, 'red', 'Segoe UI');
     this.game.debug.text('CONTROLS: arrow keys', 16, 56, 'red', 'Segoe UI');
 }
 
 function update() {
+    check_input();
     if(current_state == game_state.GAME && next_event < game.time.now) {
-	check_input();
 	move();
 	check_eat();
 	check_game_over();
@@ -230,9 +242,27 @@ function game_over() {
     spawn_food();
     button.destroy();
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
-    if(score > max_score) {
-	max_score = score;
-	localStorage.setItem('snake_max_score', max_score);
+    updateMaxScore();
+}
+
+function updateMaxScore() {
+    if(difficulty == 1) {
+	if(score > max_score_easy) {
+	    max_score_easy = score;
+	    localStorage.setItem('snake_max_score_easy', max_score_easy);
+	}
+    }
+    else if(difficulty == 2) {
+	if(score > max_score_medium) {
+	    max_score_medium = score;
+	    localStorage.setItem('snake_max_score_medium', max_score_medium);
+	}
+    }
+    else if(difficulty == 3) {
+	if(score > max_score_hard) {
+	    max_score_hard = score;
+	    localStorage.setItem('snake_max_score_hard', max_score_hard);
+	}
     }
 }
 
