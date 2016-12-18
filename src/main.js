@@ -91,7 +91,6 @@ function create() {
 
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     button.events.onInputOver.add(overBtn, this);
-    button.events.onInputOut.add(outBtn, this);
 }
 
 function getMaxScores() {
@@ -102,11 +101,6 @@ function getMaxScores() {
 
 function overBtn() {
     snd_eat.play();
-    button.key = 'btnBlackText';
-}
-
-function outBtn() {
-    button.key = 'btn';
 }
 
 function displayDifficultyChoice() {
@@ -242,6 +236,7 @@ function game_over() {
     spawn_food();
     button.destroy();
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
+    button.events.onInputOver.add(overBtn, this);
     updateMaxScore();
 }
 
