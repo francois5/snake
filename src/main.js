@@ -10,6 +10,7 @@ function preload() {
     game.load.image('tile', 'assets/tile.png');
     game.load.image('chunk', 'assets/chunk.png');
     game.load.image('food', 'assets/food.png');
+    game.load.image('img_music', 'assets/music.png');
 
     game.load.audio('eat', ['assets/eat.mp3', 'assets/eat.ogg']);
     game.load.audio('gameover', ['assets/gameover.mp3', 'assets/gameover.ogg']);
@@ -66,6 +67,8 @@ var music;
 var difficultyFactor;
 var difficulty;
 
+var img_music;
+
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
 }
@@ -81,6 +84,7 @@ function create() {
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
+    music_btn();
     draw_frame();
     getMaxScores();
     spawn_food();
@@ -91,6 +95,21 @@ function create() {
 
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     button.events.onInputOver.add(overBtn, this);
+}
+
+function music_btn() {
+    if(img_music != null)
+	img_music.destroy();
+    img_music = game.add.sprite(780, 30, 'img_music');
+    img_music.inputEnabled = true;
+    img_music.events.onInputDown.add(music_on_off, this);
+}
+
+function music_on_off() {
+    if(music.isPlaying)
+	music.stop();
+    else
+	music.play();
 }
 
 function getMaxScores() {
@@ -163,6 +182,7 @@ function startGame() {
     score = 0;
     images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
+    music_btn();
 }
 
 function render() {
@@ -207,6 +227,7 @@ function check_eat() {
 	spawn_food();
 	images[foodY][foodX].destroy();
 	images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
+	music_btn();
     }
 }
 
@@ -267,6 +288,7 @@ function clean_board() {
 	   images[y][x].destroy();
 	   images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
        }
+    music_btn();
     draw_frame();
 }
 
@@ -286,6 +308,7 @@ function draw_snake() {
 	game.add.sprite(snake.head.x*TILE_SIZE,
 			snake.head.y*TILE_SIZE,
 			'chunk');
+    music_btn();
 }
 
 function draw_frame() {
