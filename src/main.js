@@ -179,6 +179,7 @@ function startGame() {
     textBtnHard.visible = false;
     music.play();
     current_state = game_state.GAME;
+    current_direction = direction.STOP;
     score = 0;
     images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
