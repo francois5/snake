@@ -13,6 +13,7 @@ function preload() {
     game.load.image('img_music', 'assets/music.png');
 
     game.load.audio('eat', ['assets/eat.mp3', 'assets/eat.ogg']);
+    game.load.audio('wooden_hover', ['assets/wooden_hover.mp3', 'assets/wooden_hover.ogg']);
     game.load.audio('gameover', ['assets/gameover.mp3', 'assets/gameover.ogg']);
     game.load.audio('music', ['assets/8bit-music-loop.wav', 'assets/8bit-music-loop.mp3', 'assets/8bit-music-loop.ogg']);
 
@@ -79,6 +80,7 @@ function rand_foodY() {
 function create() {
     music = game.add.audio('music', 0.9, true, true);
     snd_eat = game.add.audio('eat', 0.3, false, true);
+    snd_wooden_hover = game.add.audio('wooden_hover', 0.5, false, true);
     snd_gameover = game.add.audio('gameover', 0.2, false, true);
     game.stage.backgroundColor = '#000';
     for(var y = 0; y < 21; ++y)
@@ -119,7 +121,7 @@ function getMaxScores() {
 }
 
 function overBtn() {
-    snd_eat.play();
+    snd_wooden_hover.play();
 }
 
 function displayDifficultyChoice() {
@@ -142,7 +144,7 @@ function displayDifficultyChoice() {
 }
 
 function over(item) {
-    snd_eat.play();
+    snd_wooden_hover.play();
     item.fill = "#a00909";
 }
 
@@ -187,11 +189,11 @@ function startGame() {
 }
 
 function render() {
-    this.game.debug.text('SCORE: '+score, 16, 28, 'red', 'Segoe UI');
+    this.game.debug.text('SCORE: '+score, 16, 28, 'white', 'Arial');
     this.game.debug.text('MAX SCORE: easy: '+max_score_easy
 			 +' medium: '+max_score_medium
-			 +' hard: '+max_score_hard, 16, 42, 'red', 'Segoe UI');
-    this.game.debug.text('CONTROLS: arrow keys', 16, 56, 'red', 'Segoe UI');
+			 +' hard: '+max_score_hard, 16, 42, 'white', 'Arial');
+    this.game.debug.text('CONTROLS: arrow keys', 16, 56, 'white', 'Arial');
 }
 
 function update() {
