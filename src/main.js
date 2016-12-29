@@ -70,6 +70,9 @@ var difficulty;
 
 var img_music;
 
+var pause_btn;
+var unpause_btn;
+
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
 }
@@ -97,6 +100,37 @@ function create() {
 
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     button.events.onInputOver.add(overBtn, this);
+}
+
+function put_pause_btn() {
+    if(pause_btn != null)
+	pause_btn.destroy();
+    var style = { font: "bold 30px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+    pause_btn = game.add.text(650, 30, "PAUSE", style);
+    pause_btn.inputEnabled = true;
+    pause_btn.events.onInputDown.add(pause, this);
+}
+
+function pause() {
+    pause_btn.destroy();
+    game.paused = true;
+    put_unpause_btn();
+}
+
+function put_unpause_btn() {
+    if(unpause_btn != null)
+	unpause_btn.destroy();
+    var style = { font: "bold 80px Arial", fill: "#a00909", boundsAlignH: "center", boundsAlignV: "middle" };
+    unpause_btn = game.add.text(250, 120, "RESUME", style);
+}
+
+function unpause() {
+    if(game.paused) {
+	unpause_btn.destroy();
+	game.paused = false;
+	pauseDurationTotal += game.time.pauseDuration;
+	put_pause_btn();
+    }
 }
 
 function music_btn() {
@@ -186,6 +220,8 @@ function startGame() {
     images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
     music_btn();
+    put_pause_btn();
+    game.input.onDown.add(unpause, self);
 }
 
 function render() {
@@ -231,6 +267,7 @@ function check_eat() {
 	images[foodY][foodX].destroy();
 	images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
 	music_btn();
+	put_pause_btn();
     }
 }
 
@@ -262,6 +299,7 @@ function game_over() {
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
     button.events.onInputOver.add(overBtn, this);
     updateMaxScore();
+    pause_btn.destroy();
 }
 
 function updateMaxScore() {
@@ -292,6 +330,7 @@ function clean_board() {
 	   images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
        }
     music_btn();
+    put_pause_btn();
     draw_frame();
 }
 
@@ -312,6 +351,7 @@ function draw_snake() {
 			snake.head.y*TILE_SIZE,
 			'chunk');
     music_btn();
+    put_pause_btn();
 }
 
 function draw_frame() {
