@@ -10,7 +10,6 @@ function preload() {
     game.load.image('tile', 'assets/tile.png');
     game.load.image('chunk', 'assets/chunk.png');
     game.load.image('food', 'assets/food.png');
-    game.load.image('img_music', 'assets/music.png');
 
     game.load.audio('eat', ['assets/eat.mp3', 'assets/eat.ogg']);
     game.load.audio('wooden_hover', ['assets/wooden_hover.mp3', 'assets/wooden_hover.ogg']);
@@ -18,6 +17,8 @@ function preload() {
     game.load.audio('music', ['assets/8bit-music-loop.wav', 'assets/8bit-music-loop.mp3', 'assets/8bit-music-loop.ogg']);
 
     game.load.spritesheet('btn', 'assets/button_sprite_sheet.png', 260, 100);
+    game.load.spritesheet('img_music', 'assets/music.png', 30, 30);
+    game.load.spritesheet('img_sound', 'assets/sound.png', 30, 30);
 }
 
 // image grid (y: 21 x: 42)
@@ -68,10 +69,11 @@ var music;
 var difficultyFactor;
 var difficulty;
 
-var img_music;
-
+var img_music, img_sound, soundOn = true;
 var pause_btn;
 var unpause_btn;
+
+var topItems;
 
 function rand_foodX() {
     return Math.floor(Math.random() * 38) + 2;
@@ -89,26 +91,34 @@ function create() {
     for(var y = 0; y < 21; ++y)
 	for(var x = 0; x < 42; ++x)
 	    images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
-    music_btn();
+
+    topItems = game.add.group();
+    music_btn(topItems);
+    sound_btn(topItems);
+    game.world.bringToTop(topItems);
     draw_frame();
     getMaxScores();
     spawn_food();
     upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+    console.log("check 1");
     downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
     leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
     rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
-    button.events.onInputOver.add(overBtn, this);
+    button.events.onInputOver.add(overSound, this);
 }
 
-function put_pause_btn() {
+function put_pause_btn(group) {
     if(pause_btn != null)
 	pause_btn.destroy();
     var style = { font: "bold 30px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
-    pause_btn = game.add.text(650, 30, "PAUSE", style);
+    pause_btn = game.add.text(620, 29, "PAUSE", style);
     pause_btn.inputEnabled = true;
     pause_btn.events.onInputDown.add(pause, this);
+    pause_btn.events.onInputOver.add(over, this);
+    pause_btn.events.onInputOut.add(out, this);
+    group.add(pause_btn);
 }
 
 function pause() {
@@ -128,34 +138,57 @@ function unpause() {
     if(game.paused) {
 	unpause_btn.destroy();
 	game.paused = false;
-	pauseDurationTotal += game.time.pauseDuration;
-	put_pause_btn();
+	put_pause_btn(topItems);
     }
 }
 
-function music_btn() {
+function music_btn(group) {
     if(img_music != null)
 	img_music.destroy();
-    img_music = game.add.sprite(780, 30, 'img_music');
-    img_music.inputEnabled = true;
-    img_music.events.onInputDown.add(music_on_off, this);
+    img_music = game.add.button(780, 30, 'img_music', music_on_off, this, 2, 1, 2);
+    img_music.events.onInputOver.add(overSound, this);
+    group.add(img_music);
+}
+
+function sound_btn(group) {
+    if(img_sound != null)
+	img_sound.destroy();
+    img_sound = game.add.button(740, 30, 'img_sound', sound_on_off, this, 1, 2, 1);
+    img_sound.events.onInputOver.add(overSound, this);
+    group.add(img_sound);
+}
+
+function overSound() {
+    if(soundOn)
+	snd_wooden_hover.play();
 }
 
 function music_on_off() {
-    if(music.isPlaying)
+    if(music.isPlaying) {
 	music.stop();
-    else
+	img_music.setFrames(2, 1, 2);
+    }
+    else {
 	music.play();
+	img_music.setFrames(1, 2, 1);
+    }
+}
+
+function sound_on_off() {
+    if(soundOn) {
+	soundOn = false;
+	img_sound.setFrames(2, 1, 2);
+    }
+    else {
+	soundOn = true;
+	img_sound.setFrames(1, 2, 1);
+    }
 }
 
 function getMaxScores() {
     max_score_easy   = localStorage.getItem('snake_max_score_easy');
     max_score_medium = localStorage.getItem('snake_max_score_medium');
     max_score_hard   = localStorage.getItem('snake_max_score_hard');
-}
-
-function overBtn() {
-    snd_wooden_hover.play();
 }
 
 function displayDifficultyChoice() {
@@ -178,7 +211,7 @@ function displayDifficultyChoice() {
 }
 
 function over(item) {
-    snd_wooden_hover.play();
+    overSound();
     item.fill = "#a00909";
 }
 
@@ -213,14 +246,14 @@ function startGame() {
     textBtnEasy.visible = false;
     textBtnMedium.visible = false;
     textBtnHard.visible = false;
-    music.play();
+    music.stop();
+    music_on_off();
     current_state = game_state.GAME;
     current_direction = direction.STOP;
     score = 0;
     images[foodY][foodX].destroy();
     images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
-    music_btn();
-    put_pause_btn();
+    put_pause_btn(topItems);
     game.input.onDown.add(unpause, self);
 }
 
@@ -243,6 +276,7 @@ function update() {
 }
 
 function check_input() {
+    console.log("check 2");
     if(upKey.isDown && current_direction != direction.DOWN)
 	current_direction = direction.UP;
     else if(downKey.isDown && current_direction != direction.UP)
@@ -261,13 +295,12 @@ function move() {
 function check_eat() {
     if(snake.head.x == foodX && snake.head.y == foodY) {
 	snake.grow();
-	snd_eat.play();
+	if(soundOn)
+	    snd_eat.play();
 	score+=1;
 	spawn_food();
 	images[foodY][foodX].destroy();
 	images[foodY][foodX] = game.add.sprite(foodX*TILE_SIZE, foodY*TILE_SIZE, 'food');
-	music_btn();
-	put_pause_btn();
     }
 }
 
@@ -288,8 +321,10 @@ function is_on_border(x, y) {
 }
 
 function game_over() {
-    music.pause();
-    snd_gameover.play();
+    music.play();
+    music_on_off();
+    if(soundOn)
+	snd_gameover.play();
     current_state = game_state.MENU;
     clean_board();
     current_direction = direction.STOP;
@@ -297,7 +332,7 @@ function game_over() {
     spawn_food();
     button.destroy();
     button = game.add.button(250, 120, 'btn', btnPlayClick, this, 2, 1, 0);
-    button.events.onInputOver.add(overBtn, this);
+    button.events.onInputOver.add(overSound, this);
     updateMaxScore();
     pause_btn.destroy();
 }
@@ -329,8 +364,7 @@ function clean_board() {
 	   images[y][x].destroy();
 	   images[y][x] = game.add.sprite(x*TILE_SIZE, y*TILE_SIZE, 'tile');
        }
-    music_btn();
-    put_pause_btn();
+    game.world.bringToTop(topItems);
     draw_frame();
 }
 
@@ -350,8 +384,7 @@ function draw_snake() {
 	game.add.sprite(snake.head.x*TILE_SIZE,
 			snake.head.y*TILE_SIZE,
 			'chunk');
-    music_btn();
-    put_pause_btn();
+    game.world.bringToTop(topItems);
 }
 
 function draw_frame() {
